@@ -11,7 +11,7 @@ app.use(compression());
 // Serve static files from root (for landing page and general assets)
 app.use(express.static(__dirname, {
     setHeaders: (res, filePath, stat) => {
-        if (filePath.endsWith('index.html') || filePath.endsWith('landing.html')) {
+        if (filePath.endsWith('index.html')) {
             // Never cache HTML files
             res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         } else {
@@ -21,12 +21,12 @@ app.use(express.static(__dirname, {
     }
 }));
 
-// Also serve static files from /app path (to support relative assets in Flutter app)
+// Serve Flutter app assets only under /app
 app.use('/app', express.static(__dirname));
 
-// Main Landing Page
+// Main Landing Page (index.html is now landing)
 app.get('/', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'landing.html'));
+    res.sendFile(path.resolve(__dirname, 'index.html'));
 });
 
 // Redirect /releases to root
@@ -35,13 +35,13 @@ app.get('/releases', (req, res) => {
 });
 
 // Flutter App Entry Point
-app.get('/app', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'index.html'));
+app.get(['/app', '/app/'], (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'app.html'));
 });
 
 // Flutter App SPA Fallback (handle internal routes)
 app.get('/app/*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'index.html'));
+    res.sendFile(path.resolve(__dirname, 'app.html'));
 });
 
 // Catch-all: Redirect unknown top-level routes to landing page
